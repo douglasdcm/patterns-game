@@ -1,1 +1,1 @@
-Reference: https://gameprogrammingpatterns.com
+Reference: https://gameprogrammingpatterns.com/contents.html
