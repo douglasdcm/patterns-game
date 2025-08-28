@@ -117,3 +117,57 @@ class DuckingState(HeroineState):
     def update(self, heroine: Heroine):
         if self.charge_time > MAX_CHARGE:
             heroine.super_bomb()
+
+# Concurrent state machines
+# We need to define states for the Heroine when she is armed and unarmed. So, we need two
+# state machines: one for movements and other for what shes is carring
+class Heroine:
+    def __init__(self):
+        self._state = None
+        self._equipment = None # other state machine
+
+    def handle_input(self, input):
+        # When the heroine delegates inputs to the states, she hands it to both of them
+        self._state.handle_input(self, input)
+        self._equipment.handle_input(self, input)
+
+# Hierarchical State Machines
+# Define a base state class
+class OnGroundState(HeroineState):
+    def handle_input(self, heroine, input):
+        if input == "PRESS_B":
+            print("jump")
+        elif input == "PRESS_DOWN":
+            print("duck")
+
+
+
+class DuckingState(OnGroundState):
+    def handle_input(self, heroine, input):
+        if input == "RELEASE_DOWN":
+            print("stand up")
+        else:
+            # Didn't handle input, so walk up hierarchy.
+            OnGroundState().handle_input(heroine, input)
+
+# Pushdown automata
+# if we need the Heroine is stading ahd has to transt to a given state, lets say, firing, and need to
+# go back to the previous state, we can use a stack to push and pod the current states.
+# Possible implementation
+class Heroine:
+    def __init__(self):
+        self._state = None
+        # Stores the current state in a stack
+        self._stack = [self._state]
+    def handle_state(self, input):
+        next_state = self._state.get_next_state()
+        # Stores the new state on top of the stack
+        self._stack.append(next_state)
+        # Do the stuff
+        next_state.handle_input(input)
+        # Remove the top most state and go back to the previous one
+        self._stack.pop(next_state)
+
+# Other references
+# https://medium.com/@vedantchaudhari/goal-oriented-action-planning-34035ed40d0b
+# http://web.archive.org/web/20140402204854/http://www.altdevblogaday.com/2011/02/24/introduction-to-behavior-trees/
